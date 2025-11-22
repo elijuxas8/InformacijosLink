@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Automatinis nukreipimas</title>
+  <title>Nukreipimas...</title>
   <style>
     body {
       margin: 0;
@@ -16,49 +16,40 @@
       color: #fff;
       text-align: center;
     }
-    .container {
+    .message {
       background: rgba(0,0,0,0.4);
       padding: 30px 25px;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      margin: 10px 0;
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
     }
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      background: #007bff;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
+    p {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Įrašyk nuorodą nukreipimui</h2>
-    <input type="text" id="url" placeholder="https://docs.google.com/spreadsheets/d/192oThXlgzO6WYluVKGk0_ATG3drq5Zxb5hjn50Bqpz4/edit?usp=sharing">
-    <br>
-    <button onclick="redirect()">Nukreipti</button>
+  <div class="message">
+    <h1>Nukreipiama...</h1>
+    <p>Jeigu neperadresuota automatiškai, spauskite žemiau esančią nuorodą.</p>
+    <p><a id="manual" href="https://docs.google.com/spreadsheets/d/192oThXlgzO6WYluVKGk0_ATG3drq5Zxb5hjn50Bqpz4/edit?usp=sharing" style="color:#fff;text-decoration:underline;"https://docs.google.com/spreadsheets/d/192oThXlgzO6WYluVKGk0_ATG3drq5Zxb5hjn50Bqpz4/edit?usp=sharing</a></p>
   </div>
 
   <script>
-    function redirect() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) {
-        alert('Įveskite nuorodą');
-        return;
-      }
-      // automatiškai nukreipti
-      window.location.href = url;
-    }
+    // Pakeisk čia į savo nuorodą
+    const targetUrl = "https://example.com";
+    document.getElementById('manual').href = targetUrl;
+    document.getElementById('manual').textContent = targetUrl;
+
+    // automatinis nukreipimas po 0.5s
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 500);
   </script>
 </body>
 </html>
