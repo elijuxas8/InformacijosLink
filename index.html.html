@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Greitas nuorodų sutrumpintuvas (be serverio)</title>
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f6f8fb}
+    .card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 20px rgba(20,30,60,0.08);max-width:720px;width:96%}
+    h1{margin:0 0 10px;font-size:20px}
+    p{margin:0 0 18px;color:#555}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e2e8f0;font-size:14px}
+    .row{display:flex;gap:8px;margin-top:12px}
+    button{padding:10px 14px;border-radius:8px;border:0;background:#2563eb;color:#fff;font-weight:600;cursor:pointer}
+    button.secondary{background:#6b7280}
+    .result{margin-top:14px;word-break:break-all}
+    small{color:#666}
+    footer{margin-top:16px;font-size:13px;color:#666}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Greitas nuorodų sutrumpinimas (be serverio)</h1>
+    <p>Įklijuok ilgą nuorodą — puslapis sugeneruos trumpą nuorodą su užkoduota tiksline adrese. Ją atidarę kiti vartotojai būsite nukreipti tiesiai į tą adresą.</p>
+
+    <label for="url">Ilga nuoroda</label>
+    <input id="url" type="text" placeholder="https://example.com/very/long/link?with=params" />
+
+    <div class="row">
+      <button id="make">Sutrumpinti</button>
+      <button id="copy" class="secondary">Kopijuoti</button>
+      <button id="open" class="secondary">Atidaryti</button>
+    </div>
+
+    <div class="result" id="result" aria-live="polite"></div>
+
+    <footer>
+      <small>Veikia be serverio: trumpa nuoroda saugo tikslinį adresą užkoduotą pačioje nuorodoje (naudojamas URL hash). Tai reiškia, kad rotacijos/analitikos ir bendras valdymas neveiks — tačiau nereikia jokio hostinčio serverio.</small>
+    </footer>
+  </div>
+
+  <script>
+    // Helper: base64url-safe encode / decode
+    function encodeUrl(u){
+      try{
+        const str = encodeURIComponent(u);
+        const b = btoa(str);
+        return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      }catch(e){return null}
+    }
+    function decodeUrl(s){
+      try{
+        // restore padding
+        s = s.replace(/-/g,'+').replace(/_/g,'/');
+        while(s.length % 4) s += '=';
+        const dec = atob(s);
+        return decodeURIComponent(dec);
+      }catch(e){return null}
+    }
+
+    const urlInput = document.getElementById('url');
+    const makeBtn = document.getElementById('make');
+    const copyBtn = document.getElementById('copy');
+    const openBtn = document.getElementById('open');
+    const resultEl = document.getElementById('result');
+
+    function showResult(text){ resultEl.innerHTML = text }
+
+    makeBtn.addEventListener('click', ()=>{
+      const long = urlInput.value.trim();
+      if(!long){ showResult('<span style="color:#b91c1c">Įveskite nuorodą.</span>'); return }
+      const enc = encodeUrl(long);
+      if(!enc){ showResult('<span style="color:#b91c1c">Nepavyko užkoduoti nuorodos.</span>'); return }
+      const base = location.origin + location.pathname; // base path
+      const short = base + '#u=' + enc;
+      showResult('<strong>Trumpa nuoroda:</strong> <br><a href="'+short+'" target="_blank">'+short+'</a>');
+      copyBtn.dataset.text = short;
+      openBtn.dataset.text = short;
+    })
+
+    copyBtn.addEventListener('click', async ()=>{
+      const t = copyBtn.dataset.text;
+      if(!t){ showResult('<small>Nieko nėra kopijuoti — sugeneruok nuorodą pirmiau.</small>'); return }
+      try{ await navigator.clipboard.writeText(t); showResult('<small>Nuoroda nukopijuota į iškarpinę.</small>') }catch(e){ showResult('<small>Negalima kopijuoti automatiškai — pažymėkite ir nukopijuokite rankiniu būdu:</small><br><code>'+t+'</code>') }
+    })
+
+    openBtn.addEventListener('click', ()=>{
+      const t = openBtn.dataset.text;
+      if(!t){ showResult('<small>Sugeneruok nuorodą pirmiau.</small>'); return }
+      window.open(t, '_blank');
+    })
+
+    // On load: if URL contains #u=<encoded> then decode and redirect
+    (function checkRedirect(){
+      const h = location.hash || '';
+      if(h.startsWith('#u=')){
+        const encoded = h.slice(3);
+        const decoded = decodeUrl(encoded);
+        if(decoded){
+          // show a brief message before redirecting
+          document.body.innerHTML = '<div style="font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f6f8fb"><div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(20,30,60,0.08);max-width:720px;text-align:center"><h2>Nukreipiama...</h2><p style="color:#444">Jeigu neperadresuota automatiškai, spauskite žemiau esančią nuorodą.</p><p><a id="manual" href="'+decoded+'">'+decoded+'</a></p></div></div>';
+          // small delay to allow user to see message
+          setTimeout(()=>{ location.href = decoded }, 700);
+          return;
+        }else{
+          document.body.innerHTML = '<div style="font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f6f8fb"><div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(20,30,60,0.08);max-width:720px;text-align:center"><h2>Klaida</h2><p>Negalima dekoduoti nuorodos arba žymė buvo sugadinta.</p></div></div>';
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
