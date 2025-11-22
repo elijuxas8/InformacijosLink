@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Greitas nuorodų sutrumpintuvas (be serverio)</title>
+  <title>Greitas nuorodų sutrumpinimas (be serverio)</title>
   <style>
     body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f6f8fb}
     .card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 20px rgba(20,30,60,0.08);max-width:720px;width:96%}
@@ -21,11 +21,16 @@
 </head>
 <body>
   <div class="card">
-    <h1>Greitas nuorodų sutrumpinimas (be serverio)</h1>
-    <p>Įklijuok ilgą nuorodą — puslapis sugeneruos trumpą nuorodą su užkoduota tiksline adrese. Ją atidarę kiti vartotojai būsite nukreipti tiesiai į tą adresą.</p>
+    <h1>Greitas nuorodų sutrumpinimas (su automatinio peradresavimo parinktimi)</h1>
+    <p>Įklijuok ilgą nuorodą; spausk <strong>Sutrumpinti</strong> — puslapis sugeneruos trumpą nuorodą ir <strong>iškart nukreips tave</strong> į ją (taip galėsi iškart patikrinti, kad peradresavimas veikia).</p>
 
     <label for="url">Ilga nuoroda</label>
     <input id="url" type="text" placeholder="https://example.com/very/long/link?with=params" />
+
+    <div style="margin-top:8px">
+      <label style="font-weight:600">Parinktys</label>
+      <label style="font-weight:400;display:block;margin-top:6px"><input id="autoRedirect" type="checkbox" checked /> Automatiškai nukreipti į trumpą nuorodą po sugeneravimo</label>
+    </div>
 
     <div class="row">
       <button id="make">Sutrumpinti</button>
@@ -36,12 +41,12 @@
     <div class="result" id="result" aria-live="polite"></div>
 
     <footer>
-      <small>Veikia be serverio: trumpa nuoroda saugo tikslinį adresą užkoduotą pačioje nuorodoje (naudojamas URL hash). Tai reiškia, kad rotacijos/analitikos ir bendras valdymas neveiks — tačiau nereikia jokio hostinčio serverio.</small>
+      <small>Veikia be serverio: trumpa nuoroda naudoja URL hash (pvz. <code>#u=...</code>). Atidarius tokią nuorodą, puslapis dekoduoja ir iš karto peradresuoja į tikslinį adresą.</small>
     </footer>
   </div>
 
   <script>
-    // Helper: base64url-safe encode / decode
+    // Base64 URL-safe encode / decode helpers
     function encodeUrl(u){
       try{
         const str = encodeURIComponent(u);
@@ -51,7 +56,6 @@
     }
     function decodeUrl(s){
       try{
-        // restore padding
         s = s.replace(/-/g,'+').replace(/_/g,'/');
         while(s.length % 4) s += '=';
         const dec = atob(s);
@@ -64,8 +68,9 @@
     const copyBtn = document.getElementById('copy');
     const openBtn = document.getElementById('open');
     const resultEl = document.getElementById('result');
+    const autoRedirect = document.getElementById('autoRedirect');
 
-    function showResult(text){ resultEl.innerHTML = text }
+    function showResult(html){ resultEl.innerHTML = html }
 
     makeBtn.addEventListener('click', ()=>{
       const long = urlInput.value.trim();
@@ -77,6 +82,17 @@
       showResult('<strong>Trumpa nuoroda:</strong> <br><a href="'+short+'" target="_blank">'+short+'</a>');
       copyBtn.dataset.text = short;
       openBtn.dataset.text = short;
+
+      // Jei pažymėta — iškart peradresuoti į sugeneruotą trumpą nuorodą
+      if(autoRedirect.checked){
+        // pakeičiame location į trumpą nuorodą (puslapis bus atidarytas su #u=... ir tada nukreips į originalą)
+        try{
+          location.href = short;
+        }catch(e){
+          // fallback: atidaryti naujame lange
+          window.open(short, '_blank');
+        }
+      }
     })
 
     copyBtn.addEventListener('click', async ()=>{
@@ -98,9 +114,8 @@
         const encoded = h.slice(3);
         const decoded = decodeUrl(encoded);
         if(decoded){
-          // show a brief message before redirecting
           document.body.innerHTML = '<div style="font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;background:#f6f8fb"><div style="background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(20,30,60,0.08);max-width:720px;text-align:center"><h2>Nukreipiama...</h2><p style="color:#444">Jeigu neperadresuota automatiškai, spauskite žemiau esančią nuorodą.</p><p><a id="manual" href="'+decoded+'">'+decoded+'</a></p></div></div>';
-          // small delay to allow user to see message
+          // nedelsiant peradresuoti (mažas laikas leidžia parodyti žinutę)
           setTimeout(()=>{ location.href = decoded }, 700);
           return;
         }else{
