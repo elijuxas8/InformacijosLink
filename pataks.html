@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nukreipimas...</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      color: #fff;
+      text-align: center;
+    }
+    .message {
+      background: rgba(0,0,0,0.4);
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+    p {
+      margin: 0;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="message">
+    <h1>Nukreipiama...</h1>
+    <p>Jeigu neperadresuota automatiškai, spauskite žemiau esančią nuorodą.</p>
+    <p><a id="manual" href="https://docs.google.com/spreadsheets/d/1V3GsUirNOLhQWpxqW8jOW06610hOPz6DY8w-xEEXhsQ/edit?usp=sharing" style="color:#fff;text-decoration:underline;">https://docs.google.com/spreadsheets/d/1V3GsUirNOLhQWpxqW8jOW06610hOPz6DY8w-xEEXhsQ/edit?usp=sharing</a></p>
+  </div>
+
+  <script>
+    // Pakeisk čia į savo nuorodą
+    const targetUrl = "https://docs.google.com/spreadsheets/d/1V3GsUirNOLhQWpxqW8jOW06610hOPz6DY8w-xEEXhsQ/edit?usp=sharing";
+    document.getElementById('manual').href = targetUrl;
+    document.getElementById('manual').textContent = targetUrl;
+
+    // automatinis nukreipimas po 0.5s
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 500);
+  </script>
+</body>
+</html>
