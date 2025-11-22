@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Automatinis nukreipimas</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      color: #fff;
+      text-align: center;
+    }
+    .container {
+      background: rgba(0,0,0,0.4);
+      padding: 30px 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Įrašyk nuorodą nukreipimui</h2>
+    <input type="text" id="url" placeholder="https://docs.google.com/spreadsheets/d/192oThXlgzO6WYluVKGk0_ATG3drq5Zxb5hjn50Bqpz4/edit?usp=sharing">
+    <br>
+    <button onclick="redirect()">Nukreipti</button>
+  </div>
+
+  <script>
+    function redirect() {
+      const url = document.getElementById('url').value.trim();
+      if (!url) {
+        alert('Įveskite nuorodą');
+        return;
+      }
+      // automatiškai nukreipti
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>
